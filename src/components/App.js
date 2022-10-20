@@ -1,87 +1,37 @@
 import { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { nanoid } from 'nanoid';
-import { Report } from 'notiflix/build/notiflix-report-aio';
+import SearchBar from './SearchBar/SearchBar';
+import ImageGallery from './ImageGallery/ImageGallery';
 
-import { AddContactForm } from './AddContactForm/AddContactForm';
-import { ContactFilters } from './ContactFilters/ContactFilters';
-import { ContactList } from './ContactList/ContactList';
-import { Notification } from './Notification/Notification';
-
-import { Box, Title, PhonebookIcon } from './Box.styled';
+import { Main } from './App.styled';
 
 export class App extends Component {
   state = {
-    contacts: [],
-    filter: '',
+    search: null,
   };
 
-  addContact = ({ name, number }) => {
-    const { contacts } = this.state;
-    const newContact = { id: nanoid(), name, number };
-    const inContact = contacts.some(contact => contact.name === name);
-    if (inContact) {
-      return Report.warning(
-        `${name}`,
-        'This user is already in the your contact list.',
-        'OK'
-      );
-    } else {
-      return this.setState(({ contacts }) => ({
-        contacts: [newContact, ...contacts],
-      }));
+  hendleFormSubmit = search => {
+    if (this.state.search === search) {
+      toast.warning('Choose deferent');
+      return;
     }
+    this.setState({ search: search });
+    toast.success('Ok, loading...');
   };
-
-  onFilterChange = e => this.setState({ filter: e.currentTarget.value });
-
-  filtredContactList = () =>
-    this.state.contacts.filter(({ name }) =>
-      name.toLowerCase().includes(this.state.filter)
-    );
-
-  onDeleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
-  };
-
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
 
   render() {
-    const { filter } = this.state;
+    const { search } = this.state;
+
     return (
-      <Box>
-        <PhonebookIcon />
-        <Title>phonebook</Title>
-        <AddContactForm onSubmit={this.addContact} />
-        <Title>contacts</Title>
-        <ContactFilters
-          contactList={filter}
-          onFilterChange={this.onFilterChange}
-        />
-        {this.state.contacts.length > 0 ? (
-          <ContactList
-            filtredContactList={this.filtredContactList()}
-            onDeleteContact={this.onDeleteContact}
-          />
-        ) : (
-          <Notification message="Contact list is empty." />
-        )}
-      </Box>
+      <div>
+        <SearchBar onSubmit={this.hendleFormSubmit} />
+        <Main>
+          <ImageGallery searchImages={search} />
+          <ToastContainer autoClose={2000} hideProgressBar={true} />
+        </Main>
+      </div>
     );
   }
 }
-export default App;
