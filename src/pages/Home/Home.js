@@ -2,7 +2,6 @@ import { fetchMostPopularMovies } from 'Api/Api';
 import { useState, useEffect } from 'react';
 
 import { MoviesList } from 'components/MoviesList/MoviesList.js';
-// styles
 import { Title } from 'pages/Home/home.styled.js';
 
 const Home = () => {
